@@ -35,8 +35,8 @@ fn create_data<'a>() -> Result<Vec<ToDoItem>> {
     let data = r#"
         {
             "id": 1,
-            "title": "pay fee",
-            "description": "pay fee before 25 may", 
+            "title": "title for Task1",
+            "description": "description for Task 1", 
             "priority": {"critical": "critical"}
         }"#;
     
@@ -44,8 +44,8 @@ fn create_data<'a>() -> Result<Vec<ToDoItem>> {
     let data = r#"
         {
             "id": 2,
-            "title":  "Learn parametric model checking",
-            "description": "GB sir will call you, learn parametric model checking as soon as possible...",
+            "title":  "Title for Task2",
+            "description": "Description for Task 2 ",
             "priority": {"moderate": "moderate"}
         }"#;
     let t2: ToDoItem = serde_json::from_str(data)?;
