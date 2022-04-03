@@ -1,8 +1,9 @@
 use tui::widgets::ListState;
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
-use chrono::{DateTime, TimeZone, NaiveDateTime, Utc};
-
+use serde_json::{Result};
+use std::fs;
+use std::fs::OpenOptions;
+use std::io::BufReader;
 use std::fmt;
 
 
@@ -31,26 +32,18 @@ impl fmt::Display for Priority {
         }
     }
 }
-fn create_data<'a>() -> Result<Vec<ToDoItem>> {
-    let data = r#"
-        {
-            "id": 1,
-            "title": "title for Task1",
-            "description": "description for Task 1", 
-            "priority": {"critical": "critical"}
-        }"#;
-    
-    let t1: ToDoItem = serde_json::from_str(data)?;
-    let data = r#"
-        {
-            "id": 2,
-            "title":  "Title for Task2",
-            "description": "Description for Task 2 ",
-            "priority": {"moderate": "moderate"}
-        }"#;
-    let t2: ToDoItem = serde_json::from_str(data)?;
-    let fin = vec![t1, t2]; 
-    Ok(fin)
+fn read_database<'a>() -> Result<Vec<ToDoItem>> {
+    let file = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .open("data.json").unwrap();
+    let reader = BufReader::new(file);
+    let data: Vec<ToDoItem> = match serde_json::from_reader(reader) {
+        Ok(t) => t,
+        Err(_) => {Vec::new()}
+    }; 
+    Ok(data)
 }
 
 
@@ -95,7 +88,7 @@ impl<'a> App<'a> {
             should_quit: false,
             tabs: TabsState::new(vec!["TO-DO", "In-progress", "Done","Add-task",]),
             enhanced_graphics,
-            todo_list: match create_data() {
+            todo_list: match read_database() {
                 Ok(t) => StatefulList::with_items(t),
                 Err(error) => panic!("Problem reading JSON {:?}", error),
             },
@@ -121,6 +114,8 @@ impl<'a> App<'a> {
     pub fn on_key(&mut self, c: char) {
         match c {
             'q' => {
+                let data_dump = serde_json::to_string(&self.todo_list.items).unwrap();
+                fs::write("data.json", data_dump).unwrap(); 
                 self.should_quit = true;
             }
             '\n'=> {

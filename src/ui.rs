@@ -181,6 +181,9 @@ where
         Some(i) => i,
         None => 0,
     };
+    if app.todo_list.items.len() == 0 {
+        return;
+    }
     let current_todo = &app.todo_list.items[current_todo];
     let id = &current_todo.id.to_string();
     let prio = &current_todo.priority.to_string();
